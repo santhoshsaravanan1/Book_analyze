@@ -1,4 +1,5 @@
 import os
+import uuid
 import streamlit as st
 import freesound  # from freesound-api
 import google.generativeai as genai
@@ -32,9 +33,10 @@ Text: """{user_text}"""
 
 # Function to play audio in a loop
 def play_looping_audio(url: str):
+    unique_id = uuid.uuid4().hex  # Force reload by appending a random query
     html = f"""
     <audio autoplay loop>
-      <source src="{url}" type="audio/mp3">
+      <source src="{url}?v={unique_id}" type="audio/mp3">
       Your browser does not support the audio element.
     </audio>
     """
