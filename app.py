@@ -30,10 +30,10 @@ Text: """{user_text}"""
     sentiments = response.text.strip().split('.')
     return [s.strip() for s in sentiments if s.strip()]
 
-# Function to play audio once
-def play_single_audio(url: str):
+# Function to play audio in a loop
+def play_looping_audio(url: str):
     html = f"""
-    <audio autoplay>
+    <audio autoplay loop>
       <source src="{url}" type="audio/mp3">
       Your browser does not support the audio element.
     </audio>
@@ -95,7 +95,7 @@ def main():
         name, user, url = get_emotion_sound(current_emotion)
         if url:
             st.markdown(f"**🎵 {name} — by {user}**")
-            play_single_audio(url)
+            play_looping_audio(url)
 
         col1, col2 = st.columns([1, 1])
         with col1:
@@ -107,4 +107,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
