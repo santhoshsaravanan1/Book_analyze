@@ -66,8 +66,8 @@ def get_emotion_sound(emotion: str):
 
 # Streamlit UI
 def main():
-    st.title("🎧 Emotion-Aware Soundscape Generator")
-    st.write("Enter a story or paragraph. The AI will detect emotions and let you navigate sounds one by one.")
+    st.title("🎧 Book Tunes")
+    st.write("Enter a story or paragraph and get matching music based on the content to enrich your reading experience.")
 
     if 'sentiments' not in st.session_state:
         st.session_state.sentiments = []
