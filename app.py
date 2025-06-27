@@ -33,9 +33,9 @@ Text: """{user_text}"""
 
 # Function to play audio in a loop
 def play_looping_audio(url: str):
-    unique_id = uuid.uuid4().hex  # Force reload by appending a random query
+    unique_id = uuid.uuid4().hex
     html = f"""
-    <audio autoplay loop>
+    <audio autoplay loop controls>
       <source src="{url}?v={unique_id}" type="audio/mp3">
       Your browser does not support the audio element.
     </audio>
@@ -97,7 +97,8 @@ def main():
         name, user, url = get_emotion_sound(current_emotion)
         if url:
             st.markdown(f"**🎵 {name} — by {user}**")
-            play_looping_audio(url)
+            if st.button("▶️ Play Sound"):
+                play_looping_audio(url)
 
         col1, col2 = st.columns([1, 1])
         with col1:
