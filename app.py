@@ -1,4 +1,5 @@
 import os
+import time
 import streamlit as st
 import freesound  # from freesound-api
 import google.generativeai as genai
@@ -40,8 +41,18 @@ def play_looping_audio(url: str):
     """
     st.markdown(html, unsafe_allow_html=True)
 
-# Function to search and play Freesound audio for a sentiment
-def play_emotion_sound(emotion: str):
+# Function to play audio once
+def play_single_audio(url: str):
+    html = f"""
+    <audio autoplay>
+      <source src="{url}" type="audio/mp3">
+      Your browser does not support the audio element.
+    </audio>
+    """
+    st.markdown(html, unsafe_allow_html=True)
+
+# Function to search and get Freesound audio for a sentiment
+def get_emotion_sound(emotion: str):
     try:
         results = FS_CLIENT.text_search(
             query=emotion,
@@ -52,37 +63,41 @@ def play_emotion_sound(emotion: str):
         )
     except Exception as e:
         st.error(f"API error while searching sound for '{emotion}': {e}")
-        return
+        return None, None, None
 
     if results.count == 0:
         st.warning(f"😞 No sounds found for '{emotion}'.")
+        return None, None, None
     else:
         sound = results[0]
         preview_url = getattr(sound.previews, 'preview_hq_mp3', None) or getattr(sound.previews, 'preview_lq_mp3', None)
-        if preview_url:
-            st.subheader(f"🎵 {sound.name}  — by {sound.username} [Emotion: {emotion}]")
-            play_looping_audio(preview_url)
-        else:
-            st.error("No preview available for this sound.")
+        return sound.name, sound.username, preview_url
 
 # Streamlit UI
 def main():
     st.title("🎧 Emotion-Aware Soundscape Generator")
-    st.write("Enter a story or paragraph. The AI will detect emotions and play a corresponding sound.")
+    st.write("Enter a story or paragraph. The AI will detect emotions and play sounds every 10 seconds.")
 
     user_input = st.text_area("Enter your text here...", height=200)
 
-    if st.button("Generate & Play Sound"):
+    if st.button("Generate & Play Sequential Sounds"):
         if not user_input.strip():
             st.warning("Please enter some text.")
         else:
-            with st.spinner("Analyzing sentiment and fetching sound..."):
+            with st.spinner("Analyzing sentiment and fetching sounds..."):
                 try:
                     sentiments = analyze_sentiment(user_input)
                     if sentiments:
-                        chosen_emotion = sentiments[0]  # Pick the first detected emotion for playback
                         st.success(f"Detected sentiments: {' > '.join(sentiments)}")
-                        play_emotion_sound(chosen_emotion)
+                        for emotion in sentiments:
+                            st.markdown(f"### Emotion: `{emotion}`")
+                            name, user, url = get_emotion_sound(emotion)
+                            if url:
+                                st.markdown(f"**🎵 {name} — by {user}**")
+                                play_single_audio(url)
+                                time.sleep(10)
+                            else:
+                                st.warning(f"No sound for '{emotion}'")
                     else:
                         st.warning("No sentiments detected.")
                 except Exception as e:
